@@ -1,0 +1,64 @@
+Okay, I am trying to create a mobile aplication that is intended for vendors at farmers market to be able to receive pre orders from customers. Customers will be able to create pre orders so the venders can anticipate that and have that ready. These pre orders will not be charged to the customers. This is an aplication that will be based on trust from customer to vendor. Vendors will be able to put strikes to the customers that don't meet to pick what was previously requested. I will be adding more as I go so I need something flexible as well. What application do you suggest me, we need to think about development, deployment, management and something flexible that can be used and develop. 
+
+I also want the vendors not have access to supabase. I want the vendors be able to change their menus and products within the aplication.
+
+We are creating Expo + React Native _ typescript with an expo router that provides IOS/ Android Support. 
+
+
+
+I am going to create and divide into the following ones 
+
+	Profiles
+	Vendors
+	Products 
+	Orders and order_items
+	pickup_windows
+	Order_events
+
+
+First thing, 
+	to set up an expo app
+	naviagation
+	sign in
+	role based screens 
+
+		app/
+  			(auth)/
+  			(customer)/
+  			(vendor)/
+		src/
+		  components/
+  		features/
+   	 		auth/
+    			products/
+    			orders/
+    			vendors/
+ 		 lib/
+    			supabase.ts
+  			types/
+			supabase/
+ 		 migrations/
+
+
+
+
+| Use | Color | Hex |
+| --- | --- | --- |
+| Main background | Warm cream | `#F8F5EC` |
+| Header / main title | Deep forest green | `#234735` |
+| Main text | Dark green-gray | `#24362C` |
+| Secondary text | Soft sage-gray | `#657267` |
+| Cards / input backgrounds | Soft white | `#FFFEF9` |
+| Buttons / selected states | Leaf green | `#537D4A` |
+| Subtle panels / badges | Pale green | `#E4ECD9` |
+| Small accent | Tomato red | `#B84E37` |
+| Small accent | Harvest gold | `#F0C75E` |
+
+
+In order to make this project easy and stetically pleasing. The first thing the client/vendor sees will be 2 options, one for the customer the second one for the vendor 
+
+
+The accounts will be role based which means customers will have one type of account which will only allow them to create orders, leave comments 
+
+Vendors will have another account which will allow them to create the orders, personalized them, help them keep track of them and conmfirm wheter they were picked up or not
+
