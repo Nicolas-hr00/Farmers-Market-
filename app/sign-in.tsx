@@ -1,21 +1,32 @@
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 export default function SignInScreen () {
+    const router = useRouter();
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [ email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [isSigningIn, setIsSigningIn] = useState(false);
 
+    async function blockSignIn(messageToShow: string) {
+        const { error: signOutError } = await supabase.auth.signOut();
+        setMessage(
+            signOutError
+                ? `${messageToShow} Sign out failed: ${signOutError.message}`
+                : messageToShow,
+        );
+    }
+
     async function handleSignIn() {
         setMessage('');
         setIsSigningIn(true);
 
         try { 
-            const { error } = await supabase.auth.signInWithPassword ({
+            const { data, error } = await supabase.auth.signInWithPassword ({
                 email: email.trim(),
                 password,
             });
@@ -24,7 +35,63 @@ export default function SignInScreen () {
                 setMessage(error.message);
                 return;
             }
-            setMessage('Signed in successfully.')
+
+            const { data: profile, error: profileError } = await supabase
+                .from('market_profiles')
+                .select('account_type')
+                .eq('user_id', data.user.id)
+                .maybeSingle();
+
+            if (profileError) {
+                await blockSignIn(
+                    `Could not check your profile: ${profileError.message}`,
+                );
+                return;
+            }
+
+            if (!profile) {
+                await blockSignIn(
+                    'We could not find your account profile. Please contact support.',
+                );
+                return;
+            }
+
+            if (profile.account_type === 'vendor') {
+                const { data: application, error: applicationError } =
+                    await supabase
+                        .from('vendor_applications')
+                        .select('status')
+                        .eq('user_id', data.user.id)
+                        .maybeSingle();
+
+                if (applicationError) {
+                    await blockSignIn(
+                        `Could not check vendor approval: ${applicationError.message}`,
+                    );
+                    return;
+                }
+
+                if (!application) {
+                    await blockSignIn(
+                        'We could not find your vendor application. Please contact support.',
+                    );
+                    return;
+                }
+
+                if (application.status !== 'approved') {
+                    const approvalMessage =
+                        application.status === 'pending'
+                            ? 'Your vendor application is pending review. You can sign in once it has been approved.'
+                            : 'Your vendor application was not approved. Please contact us if you think this is an error.';
+                    await blockSignIn(approvalMessage);
+                    return;
+                }
+
+                router.replace('/vendor');
+                return;
+            }
+
+            router.replace('/customer');
         } catch (error ) { 
             setMessage(error instanceof Error ? error.message : 'Sign in failed');
         } finally { 
